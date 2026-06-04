@@ -77,7 +77,7 @@
                 const result = await response.json();
                 
                 if (response.ok && result.success) {
-                    showMessage('Email verified successfully! Your account is now pending admin approval.', 'success');
+                    showMessage('Email verified successfully! Your account is now pending for Admin Approval.', 'success');
                 } else {
                     showMessage(result.error || 'Verification failed. The link may have expired.', 'error');
                 }
