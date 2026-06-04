@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Verified - Rzak</title>
+    <title>Email Verification - Rzak</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,13 +24,15 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             text-align: center;
         }
-        h1 { color: #4CAF50; margin-bottom: 20px; }
+        h1 { margin-bottom: 20px; }
+        .success { color: #4CAF50; }
+        .error { color: #e74c3c; }
         .loader {
             display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 20px 0;
@@ -59,8 +61,14 @@
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
         
-        function showMessage(msg, type) {
-            document.getElementById('content').innerHTML = '<div class="message ' + type + '">' + msg + '</div>';
+        function showMessage(message, type) {
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="message ' + type + '">' + message + '</div>';
+            if (type === 'success') {
+                document.querySelector('h1').className = 'success';
+            } else {
+                document.querySelector('h1').className = 'error';
+            }
         }
         
         async function verifyEmail() {
@@ -70,15 +78,22 @@
             }
             
             try {
-                const response = await fetch(SUPABASE_URL + '/functions/v1/verify-email?token=' + token);
+                const response = await fetch(SUPABASE_URL + '/functions/v1/verify-email?token=' + token, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
                 const result = await response.json();
                 
                 if (response.ok && result.success) {
-                    showMessage('Email verified successfully! You can now close this window.', 'success');
+                    showMessage(result.message || 'Email verified successfully! Your account is now pending admin approval.', 'success');
                 } else {
-                    showMessage(result.error || 'Verification failed. The link may have expired.', 'error');
+                    showMessage(result.error || 'Verification failed.', 'error');
                 }
             } catch (error) {
+                console.error('Error:', error);
                 showMessage('Network error. Please try again.', 'error');
             }
         }
